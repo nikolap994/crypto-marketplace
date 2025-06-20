@@ -7,9 +7,9 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/api/ping', (req, res) => {
-  res.send({ message: 'pong from Express backend' });
+  res.send({ message: 'PONG' });
 });
 
-app.listen(4000, () => {
+app.listen(process.env.PORT , () => {
   console.log('Backend running on http://localhost:4000');
 });
