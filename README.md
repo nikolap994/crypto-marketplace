@@ -17,19 +17,21 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ## 🧱 Project Structure
 
+```
 /crypto-marketplace/
-├── backend/ # Express.js API server
-│ ├── routes/
-│ ├── controllers/
-│ ├── db/
-│ ├── .env
-│ └── server.js
-├── frontend/ # Next.js frontend app
-│ ├── pages/
-│ ├── public/
-│ └── next.config.js
+├── backend/         # Express.js API server
+│   ├── routes/
+│   ├── controllers/
+│   ├── db/
+│   ├── .env
+│   └── server.js
+├── frontend/        # Next.js frontend app
+│   ├── pages/
+│   ├── public/
+│   └── next.config.js
 ├── README.md
-└── docker-compose.yml # (optional)
+└── docker-compose.yml   # (optional)
+```
 
 
 ---
@@ -97,15 +99,16 @@ docker-compose up -d
 
 Open pgAdmin in your browser:
 👉 http://localhost:5050
-Log in with:
 
-Email: admin@local.com
-Password: admin
+### Log in with:
 
-Add a new server in pgAdmin:
+- Email: admin@local.com
+- Password: admin
 
-Name: Local Postgres
-Host: db
-Port: 5432
-Username: postgres
-Password: postgres
+### Add a new server in pgAdmin:
+
+- Name: Local Postgres
+- Host: db
+- Port: 5432
+- Username: postgres
+- Password: postgres
