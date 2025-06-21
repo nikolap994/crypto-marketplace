@@ -16,9 +16,6 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 ---
 
 ## 🛠 Development Plan
-
-# 🛠 Crypto Marketplace MVP – Complete Development Plan
-
 ---
 
 ## ✅ Week 3 – 🛍 Product Listing (CRUD)
