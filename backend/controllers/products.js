@@ -9,6 +9,11 @@ exports.getAllProducts = async (req, res) => {
         equals: req.query.seller,
         mode: "insensitive",
       };
+    } else {
+      where.status = {
+        equals: req.query.status || "approved",
+        mode: "insensitive",
+      };
     }
     const products = await prisma.product.findMany({ where });
     res.json(products);
