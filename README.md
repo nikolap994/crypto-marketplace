@@ -17,30 +17,6 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ## 🛠 Development Plan
 
-## ✅ Week 3 – 🛍 Product Listing (CRUD)
-
-### Frontend
-- ✅ Seller dashboard UI
-- ✅ Product create/edit form
-- ✅ Display product list for all users
-- 🔄 Show "My Listings" (products submitted by current wallet)
-- 🔍 Product status indicators (pending / approved / rejected)
-
-### Backend
-- ✅ Endpoints:
-  - `POST /products`
-  - `GET /products`
-  - `GET /products/:id`
-- ✅ Database: `products` table
-  - `id`, `title`, `description`, `price`, `seller`, `status`, `createdAt`
-- 🔐 Middleware:
-  - Restrict `POST`/`PATCH` to authenticated users
-  - Only allow product owner to edit/delete (if not yet approved)
-
-📝 **Goal**: Sellers can list and manage their own products, and approved products are publicly visible.
-
----
-
 ## ✅ Week 4 – 💸 Orders & Manual ETH Payment
 
 ### Frontend

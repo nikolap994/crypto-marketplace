@@ -178,6 +178,7 @@ export default function SellerDashboard() {
               <th>Price (USD)</th>
               <th>Status</th>
               <th>Created</th>
+              <th>Edit</th>
             </tr>
           </thead>
           <tbody>
@@ -188,6 +189,11 @@ export default function SellerDashboard() {
                 <td>${p.priceUsd}</td>
                 <td>{p.status}</td>
                 <td>{new Date(p.createdAt).toLocaleString()}</td>
+                <td>
+                  <Link href={`/seller-dashboard/${p.id}/edit`}>
+                    <button>Edit</button>
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>
