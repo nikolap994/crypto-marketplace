@@ -73,10 +73,11 @@ export default function AdminDashboard() {
 
   if (!jwt) {
     return (
-      <main>
-        <h2>Admin Login</h2>
-        <form onSubmit={handleLogin}>
+      <main className="max-w-md mx-auto p-4">
+        <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
+        <form onSubmit={handleLogin} className="flex flex-col gap-3 bg-white rounded shadow p-4 mb-6">
           <input
+            className="border rounded px-3 py-2"
             placeholder="Username"
             value={loginForm.username}
             onChange={(e) =>
@@ -84,6 +85,7 @@ export default function AdminDashboard() {
             }
           />
           <input
+            className="border rounded px-3 py-2"
             placeholder="Password"
             type="password"
             value={loginForm.password}
@@ -91,72 +93,82 @@ export default function AdminDashboard() {
               setLoginForm((f) => ({ ...f, password: e.target.value }))
             }
           />
-          <button type="submit">Login</button>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+          >
+            Login
+          </button>
         </form>
-        {loginError && <p style={{ color: "red" }}>{loginError}</p>}
+        {loginError && <p className="text-red-600">{loginError}</p>}
       </main>
     );
   }
 
   return (
-    <main>
-      <h2>Super Admin Dashboard</h2>
-      <p>
-        <Link href="/admin-dashboard/orders">Orders</Link>
+    <main className="max-w-3xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Super Admin Dashboard</h2>
+      <p className="mb-4">
+        <Link href="/admin-dashboard/orders" className="text-blue-600 hover:underline">Orders</Link>
       </p>
-      <h3>Pending Products</h3>
-      {message && <p style={{ color: "red" }}>{message}</p>}
+      <h3 className="text-lg font-semibold mb-2">Pending Products</h3>
+      {message && <p className="text-red-600 mb-2">{message}</p>}
       {products.length === 0 ? (
         <p>No pending products.</p>
       ) : (
-        <table border="1" cellPadding="6">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Seller</th>
-              <th>Price</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id}>
-                <td>{p.title}</td>
-                <td>{p.description}</td>
-                <td>{p.seller}</td>
-                <td>${p.priceUsd}</td>
-                <td>
-                  <button onClick={() => handleAction(p.id, "approved")}>
-                    Approve
-                  </button>
-                  <button onClick={() => handleAction(p.id, "rejected")}>
-                    Reject
-                  </button>
-                  <Link
-                    href={`/admin-dashboard/${p.id}/edit`}
-                    style={{ marginLeft: 8 }}
-                  >
-                    <button>Edit</button>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    style={{ color: "red", marginLeft: 8 }}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border rounded shadow text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-2 px-3 text-left">Title</th>
+                <th className="py-2 px-3 text-left">Description</th>
+                <th className="py-2 px-3 text-left">Seller</th>
+                <th className="py-2 px-3 text-left">Price</th>
+                <th className="py-2 px-3 text-left">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id} className="border-t">
+                  <td className="py-2 px-3">{p.title}</td>
+                  <td className="py-2 px-3">{p.description}</td>
+                  <td className="py-2 px-3">{p.seller}</td>
+                  <td className="py-2 px-3">${p.priceUsd}</td>
+                  <td className="py-2 px-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleAction(p.id, "approved")}
+                      className="bg-green-100 text-green-700 rounded px-3 py-1 hover:bg-green-200 transition"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleAction(p.id, "rejected")}
+                      className="bg-yellow-100 text-yellow-700 rounded px-3 py-1 hover:bg-yellow-200 transition"
+                    >
+                      Reject
+                    </button>
+                    <Link href={`/admin-dashboard/${p.id}/edit`}>
+                      <button className="bg-gray-200 rounded px-3 py-1 hover:bg-gray-300 transition">Edit</button>
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="bg-red-100 text-red-700 rounded px-3 py-1 hover:bg-red-200 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       <button
         onClick={() => {
           setJwt(null);
           localStorage.removeItem("admin_jwt");
         }}
-        style={{ marginTop: "1rem" }}
+        className="mt-8 bg-gray-200 rounded px-4 py-2 hover:bg-gray-300 transition"
       >
         Logout
       </button>

@@ -1,3 +1,4 @@
+import './globals.css';
 import { Web3Provider } from './providers';
 
 export default function RootLayout({ children }) {

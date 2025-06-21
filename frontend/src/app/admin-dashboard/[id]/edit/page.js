@@ -67,18 +67,20 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="p-4">Loading...</div>;
 
   return (
-    <main>
-      <h2>Edit Product</h2>
-      <form onSubmit={handleSubmit}>
+    <main className="max-w-xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 bg-white rounded shadow p-4 mb-6">
         <input
+          className="border rounded px-3 py-2"
           placeholder="Title"
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
         />
         <input
+          className="border rounded px-3 py-2"
           placeholder="Description"
           value={form.description}
           onChange={(e) =>
@@ -86,20 +88,29 @@ export default function EditProductPage() {
           }
         />
         <input
+          className="border rounded px-3 py-2"
           placeholder="Price (USD)"
           type="number"
           value={form.priceUsd}
           onChange={(e) => setForm((f) => ({ ...f, priceUsd: e.target.value }))}
         />
-        <button type="submit">Save</button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="bg-red-100 text-red-700 rounded px-4 py-2 hover:bg-red-200 transition"
+          >
+            Delete Product
+          </button>
+        </div>
       </form>
-      <button
-        onClick={handleDelete}
-        style={{ color: "red", marginTop: "1rem" }}
-      >
-        Delete Product
-      </button>
-      {message && <p>{message}</p>}
+      {message && <p className="mt-2">{message}</p>}
     </main>
   );
 }

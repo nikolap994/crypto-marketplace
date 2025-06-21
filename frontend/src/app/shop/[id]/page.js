@@ -9,6 +9,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
 const PLATFORM_PERCENT = parseFloat(process.env.NEXT_PUBLIC_PLATFORM_PERCENT || "5");
 const SELLER_PERCENT = 100 - PLATFORM_PERCENT;
+const WALLET_URL_PROD = process.env.NEXT_PUBLIC_WALLET_URL_PROD || "https://etherscan.io/tx/";
+const WALLET_URL_DEV = process.env.NEXT_PUBLIC_WALLET_URL_DEV || "https://sepolia.etherscan.io/tx/";
+const WALLET_ENV = process.env.NEXT_PUBLIC_WALLET_ENV || "dev";
+const WALLET_URL = WALLET_ENV === "prod" ? WALLET_URL_PROD : WALLET_URL_DEV;
 
 export default function ProductDetailPage({ params }) {
   const actualParams =
@@ -111,34 +115,41 @@ export default function ProductDetailPage({ params }) {
   if (product.error) return <div>Product not found.</div>;
 
   return (
-    <main>
-      <Link href="/products">&larr; Back to products</Link>
-      <h2>{product.title}</h2>
-      <p>{product.description}</p>
-      <p>Price: ${product.priceUsd}</p>
-      <p>Seller: {product.seller}</p>
-      <p>Status: {product.status}</p>
-      <p>
-        ETH Amount: {totalEth.toFixed(6)} <br />
-        <span style={{ color: "orange" }}>
+    <main className="max-w-xl mx-auto p-4">
+      <Link href="/shop" className="text-blue-600 hover:underline">&larr; Back to products</Link>
+      <h2 className="text-2xl font-bold mt-4 mb-2">{product.title}</h2>
+      <p className="mb-2">{product.description}</p>
+      <div className="mb-2">
+        <span className="font-semibold">Price:</span> ${product.priceUsd}
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Seller:</span> {product.seller}
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Status:</span> {product.status}
+      </div>
+      <div className="mb-4">
+        <span className="font-semibold">ETH Amount:</span> {totalEth.toFixed(6)}
+        <br />
+        <span className="text-orange-600">
           Platform fee ({PLATFORM_PERCENT}%): {platformEth} ETH
         </span>
         <br />
-        <span style={{ color: "green" }}>
+        <span className="text-green-700">
           Seller receives ({SELLER_PERCENT}%): {sellerEth} ETH
         </span>
-      </p>
+      </div>
       {product.status === "approved" && (
         <>
           {!isConnected ? (
-            <div style={{ marginTop: "1rem" }}>
+            <div className="mt-4">
               <ConnectButton />
-              <p style={{ color: "red" }}>Connect your wallet to buy.</p>
+              <p className="text-red-600 mt-2">Connect your wallet to buy.</p>
             </div>
           ) : (
             <button
               onClick={handleBuy}
-              style={{ marginTop: "1rem" }}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               disabled={isLoading}
             >
               {isLoading ? "Processing..." : `Buy with ETH`}
@@ -147,32 +158,34 @@ export default function ProductDetailPage({ params }) {
         </>
       )}
       {txHashes.platform && (
-        <p style={{ color: "orange" }}>
+        <p className="mt-4 text-orange-600">
           Platform fee tx sent:{" "}
           <a
-            href={`https://etherscan.io/tx/${txHashes.platform}`}
+            href={`${WALLET_URL}${txHashes.platform}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="underline"
           >
             {txHashes.platform.slice(0, 12)}...
           </a>
         </p>
       )}
       {txHashes.seller && (
-        <p style={{ color: "green" }}>
+        <p className="mt-2 text-green-700">
           Seller payment tx sent:{" "}
           <a
-            href={`https://etherscan.io/tx/${txHashes.seller}`}
+            href={`${WALLET_URL}${txHashes.seller}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="underline"
           >
             {txHashes.seller.slice(0, 12)}...
           </a>
         </p>
       )}
-      {error && <p style={{ color: "red" }}>{error.message}</p>}
+      {error && <p className="text-red-600 mt-2">{error.message}</p>}
       {message && (
-        <p style={{ color: message.includes("failed") ? "red" : "green" }}>
+        <p className={`mt-2 ${message.includes("failed") ? "text-red-600" : "text-green-700"}`}>
           {message}
         </p>
       )}
