@@ -4,10 +4,8 @@ import { useAccount } from "wagmi";
 import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const WALLET_URL_PROD =
-  process.env.NEXT_PUBLIC_WALLET_URL_PROD || "https://etherscan.io/tx/";
-const WALLET_URL_DEV =
-  process.env.NEXT_PUBLIC_WALLET_URL_DEV || "https://sepolia.etherscan.io/tx/";
+const WALLET_URL_PROD = process.env.NEXT_PUBLIC_WALLET_URL_PROD;
+const WALLET_URL_DEV = process.env.NEXT_PUBLIC_WALLET_URL_DEV;
 const WALLET_ENV = process.env.NEXT_PUBLIC_WALLET_ENV || "dev";
 const WALLET_URL = WALLET_ENV === "prod" ? WALLET_URL_PROD : WALLET_URL_DEV;
 

@@ -6,13 +6,14 @@ import { parseEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import MarketplaceEscrowArtifact from "../../../../@abi/MarketplaceEscrow.json";
 
-const MarketplaceEscrowABI = MarketplaceEscrowArtifact.abis[
-  Object.keys(MarketplaceEscrowArtifact.abis)[0]
-];
+const MarketplaceEscrowABI =
+  MarketplaceEscrowArtifact.abis[
+    Object.keys(MarketplaceEscrowArtifact.abis)[0]
+  ];
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT;
-const WALLET_URL_PROD = process.env.NEXT_PUBLIC_WALLET_URL_PROD || "https://etherscan.io/tx/";
-const WALLET_URL_DEV = process.env.NEXT_PUBLIC_WALLET_URL_DEV || "https://sepolia.etherscan.io/tx/";
+const WALLET_URL_PROD = process.env.NEXT_PUBLIC_WALLET_URL_PROD;
+const WALLET_URL_DEV = process.env.NEXT_PUBLIC_WALLET_URL_DEV;
 const WALLET_ENV = process.env.NEXT_PUBLIC_WALLET_ENV || "dev";
 const WALLET_URL = WALLET_ENV === "prod" ? WALLET_URL_PROD : WALLET_URL_DEV;
 
@@ -117,7 +118,9 @@ export default function ProductDetailPage({ params }) {
 
   return (
     <main className="max-w-xl mx-auto p-4">
-      <Link href="/shop" className="text-blue-600 hover:underline">&larr; Back to products</Link>
+      <Link href="/shop" className="text-blue-600 hover:underline">
+        &larr; Back to products
+      </Link>
       <h2 className="text-2xl font-bold mt-4 mb-2">{product.title}</h2>
       <p className="mb-2">{product.description}</p>
       <div className="mb-2">
@@ -173,7 +176,11 @@ export default function ProductDetailPage({ params }) {
       )}
       {error && <p className="text-red-600 mt-2">{error.message}</p>}
       {message && (
-        <p className={`mt-2 ${message.includes("failed") ? "text-red-600" : "text-green-700"}`}>
+        <p
+          className={`mt-2 ${
+            message.includes("failed") ? "text-red-600" : "text-green-700"
+          }`}
+        >
           {message}
         </p>
       )}
