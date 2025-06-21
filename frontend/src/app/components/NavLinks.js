@@ -9,16 +9,6 @@ export default function NavLinks() {
           Go to Shop
         </button>
       </Link>
-      <Link href="/login">
-        <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
-          Login / Dashboard
-        </button>
-      </Link>
-      <Link href="https://github.com/your-repo" target="_blank">
-        <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
-          GitHub
-        </button>
-      </Link>
     </div>
   );
 }

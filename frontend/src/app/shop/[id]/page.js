@@ -1,14 +1,16 @@
 "use client";
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { useAccount, useSendTransaction } from "wagmi";
+import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import MarketplaceEscrowArtifact from "../../../../@abi/MarketplaceEscrow.json";
 
+const MarketplaceEscrowABI = MarketplaceEscrowArtifact.abis[
+  Object.keys(MarketplaceEscrowArtifact.abis)[0]
+];
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-const PLATFORM_PERCENT = parseFloat(process.env.NEXT_PUBLIC_PLATFORM_PERCENT || "5");
-const SELLER_PERCENT = 100 - PLATFORM_PERCENT;
+const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT;
 const WALLET_URL_PROD = process.env.NEXT_PUBLIC_WALLET_URL_PROD || "https://etherscan.io/tx/";
 const WALLET_URL_DEV = process.env.NEXT_PUBLIC_WALLET_URL_DEV || "https://sepolia.etherscan.io/tx/";
 const WALLET_ENV = process.env.NEXT_PUBLIC_WALLET_ENV || "dev";
@@ -23,7 +25,16 @@ export default function ProductDetailPage({ params }) {
   const [product, setProduct] = useState(null);
   const [message, setMessage] = useState("");
   const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const [txHashes, setTxHashes] = useState({ platform: null, seller: null });
+  const [txHash, setTxHash] = useState(null);
+
+  // Read platform percent from contract
+  const { data: platformPercentRaw } = useReadContract({
+    address: ESCROW_CONTRACT,
+    abi: MarketplaceEscrowABI,
+    functionName: "platformPercent",
+  });
+  const PLATFORM_PERCENT = platformPercentRaw ? Number(platformPercentRaw) : 0;
+  const SELLER_PERCENT = 100 - PLATFORM_PERCENT;
 
   useEffect(() => {
     if (!id) return;
@@ -32,21 +43,17 @@ export default function ProductDetailPage({ params }) {
       .then(setProduct);
   }, [id]);
 
-  // Calculate ETH amounts using env percentages
+  // Calculate ETH amounts using contract percentages
   const totalEth = product ? product.priceUsd / 3500 : 0;
   const platformEth = ((totalEth * PLATFORM_PERCENT) / 100).toFixed(6);
   const sellerEth = ((totalEth * SELLER_PERCENT) / 100).toFixed(6);
 
-  const { sendTransactionAsync, isLoading, error } = useSendTransaction();
+  const { writeContractAsync, isPending, error } = useWriteContract();
 
-  // React to both transaction hashes and submit order after both succeed
+  // Submit order to backend after txHash is set
   useEffect(() => {
-    if (
-      txHashes.platform &&
-      txHashes.seller &&
-      !orderSubmitted
-    ) {
-      setMessage("Both transactions sent! Submitting order...");
+    if (txHash && !orderSubmitted && product) {
+      setMessage("Transaction sent! Submitting order...");
       (async () => {
         try {
           const jwt = localStorage.getItem("jwt");
@@ -58,15 +65,14 @@ export default function ProductDetailPage({ params }) {
             },
             body: JSON.stringify({
               productId: product.id,
-              txHash: txHashes.seller, // Seller payment tx hash
+              txHash,
               buyer: address,
-              platformTxHash: txHashes.platform, // Platform fee tx hash
               platformAmount: parseFloat(platformEth),
               sellerAmount: parseFloat(sellerEth),
             }),
           });
           if (res.ok) {
-            setMessage("Order complete! Both payments sent.");
+            setMessage("Order complete! Payment sent via escrow.");
           } else {
             const errData = await res.json();
             setMessage(errData.error || "Failed to submit order.");
@@ -77,34 +83,29 @@ export default function ProductDetailPage({ params }) {
         }
       })();
     }
-  }, [txHashes, orderSubmitted, product, address, id, platformEth, sellerEth]);
+  }, [txHash, orderSubmitted, product, address, platformEth, sellerEth]);
 
   const handleBuy = async () => {
     setMessage("");
     setOrderSubmitted(false);
-    setTxHashes({ platform: null, seller: null });
+    setTxHash(null);
 
-    if (!PLATFORM_WALLET || !product?.seller || !sendTransactionAsync) {
-      setMessage("Wallet not connected or platform/seller wallet misconfigured.");
+    if (!ESCROW_CONTRACT || !product?.seller || !writeContractAsync) {
+      setMessage("Wallet not connected or contract misconfigured.");
       return;
     }
 
     try {
-      setMessage(`Sending ${PLATFORM_PERCENT}% platform fee...`);
-      const platformTx = await sendTransactionAsync({
-        to: PLATFORM_WALLET,
-        value: parseEther(platformEth),
+      setMessage("Sending payment via escrow contract...");
+      const tx = await writeContractAsync({
+        address: ESCROW_CONTRACT,
+        abi: MarketplaceEscrowABI,
+        functionName: "buy",
+        args: [product.seller],
+        value: parseEther(totalEth.toString()),
       });
-      setTxHashes((prev) => ({ ...prev, platform: typeof platformTx === "string" ? platformTx : platformTx.hash }));
-
-      setMessage(`Sending ${SELLER_PERCENT}% to seller...`);
-      const sellerTx = await sendTransactionAsync({
-        to: product.seller,
-        value: parseEther(sellerEth),
-      });
-      setTxHashes((prev) => ({ ...prev, seller: typeof sellerTx === "string" ? sellerTx : sellerTx.hash }));
-
-      setMessage("Both transactions sent! Waiting for confirmation...");
+      setTxHash(typeof tx === "string" ? tx : tx.hash);
+      setMessage("Transaction sent! Waiting for confirmation...");
     } catch (err) {
       setMessage("Transaction failed or was rejected.");
     }
@@ -150,36 +151,23 @@ export default function ProductDetailPage({ params }) {
             <button
               onClick={handleBuy}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              disabled={isLoading}
+              disabled={isPending}
             >
-              {isLoading ? "Processing..." : `Buy with ETH`}
+              {isPending ? "Processing..." : `Buy with ETH`}
             </button>
           )}
         </>
       )}
-      {txHashes.platform && (
-        <p className="mt-4 text-orange-600">
-          Platform fee tx sent:{" "}
+      {txHash && (
+        <p className="mt-4 text-green-700">
+          Payment tx sent:{" "}
           <a
-            href={`${WALLET_URL}${txHashes.platform}`}
+            href={`${WALLET_URL}${txHash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
           >
-            {txHashes.platform.slice(0, 12)}...
-          </a>
-        </p>
-      )}
-      {txHashes.seller && (
-        <p className="mt-2 text-green-700">
-          Seller payment tx sent:{" "}
-          <a
-            href={`${WALLET_URL}${txHashes.seller}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            {txHashes.seller.slice(0, 12)}...
+            {txHash.slice(0, 12)}...
           </a>
         </p>
       )}

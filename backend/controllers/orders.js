@@ -6,7 +6,6 @@ exports.createOrder = async (req, res) => {
     productId,
     buyer,
     txHash,
-    platformTxHash,
     platformAmount,
     sellerAmount,
   } = req.body;
@@ -14,7 +13,6 @@ exports.createOrder = async (req, res) => {
     !productId ||
     !buyer ||
     !txHash ||
-    !platformTxHash ||
     !platformAmount ||
     !sellerAmount
   )
@@ -24,10 +22,7 @@ exports.createOrder = async (req, res) => {
   if (!product) return res.status(404).json({ error: "Product not found" });
   if (product.status !== "approved")
     return res.status(400).json({ error: "Product not approved" });
-  if (
-    !/^0x([A-Fa-f0-9]{64})$/.test(txHash) ||
-    !/^0x([A-Fa-f0-9]{64})$/.test(platformTxHash)
-  )
+  if (!/^0x([A-Fa-f0-9]{64})$/.test(txHash))
     return res.status(400).json({ error: "Invalid tx hash" });
 
   try {
@@ -36,7 +31,6 @@ exports.createOrder = async (req, res) => {
         productId,
         buyer,
         txHash,
-        platformTxHash,
         platformAmount,
         sellerAmount,
       },

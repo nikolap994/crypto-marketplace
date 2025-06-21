@@ -39,7 +39,6 @@ export default function AdminOrdersPage() {
                 <th className="py-2 px-3 text-left">Buyer</th>
                 <th className="py-2 px-3 text-left text-orange-600">Platform Cut (ETH)</th>
                 <th className="py-2 px-3 text-left text-green-700">Seller Cut (ETH)</th>
-                <th className="py-2 px-3 text-left">Platform Tx</th>
                 <th className="py-2 px-3 text-left">Seller Tx</th>
                 <th className="py-2 px-3 text-left">Date</th>
               </tr>
@@ -52,16 +51,6 @@ export default function AdminOrdersPage() {
                   <td className="py-2 px-3">{order.buyer}</td>
                   <td className="py-2 px-3 text-orange-600">{order.platformAmount}</td>
                   <td className="py-2 px-3 text-green-700">{order.sellerAmount}</td>
-                  <td className="py-2 px-3">
-                    <a
-                      href={`${WALLET_URL}${order.platformTxHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      {order.platformTxHash?.slice(0, 10)}...
-                    </a>
-                  </td>
                   <td className="py-2 px-3">
                     <a
                       href={`${WALLET_URL}${order.txHash}`}
