@@ -16,7 +16,6 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 ---
 
 ## 🛠 Development Plan
----
 
 ## ✅ Week 3 – 🛍 Product Listing (CRUD)
 
