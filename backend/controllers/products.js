@@ -60,3 +60,29 @@ exports.getProductById = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch product" });
   }
 };
+
+exports.updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, priceUsd } = req.body;
+  try {
+    const product = await prisma.product.update({
+      where: { id: Number(id) },
+      data: { title, description, priceUsd },
+    });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update product" });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.product.delete({
+      where: { id: Number(id) },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete product" });
+  }
+};
