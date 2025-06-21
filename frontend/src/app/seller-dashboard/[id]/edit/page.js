@@ -12,6 +12,7 @@ export default function EditProductPage() {
     title: "",
     description: "",
     priceUsd: "",
+    type: "digital", // default to digital
   });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,7 @@ export default function EditProductPage() {
           title: data.title,
           description: data.description,
           priceUsd: data.priceUsd,
+          type: data.type || "digital",
         });
         setLoading(false);
       });
@@ -94,6 +96,14 @@ export default function EditProductPage() {
           value={form.priceUsd}
           onChange={(e) => setForm((f) => ({ ...f, priceUsd: e.target.value }))}
         />
+        <select
+          className="border rounded px-3 py-2"
+          value={form.type}
+          onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+        >
+          <option value="digital">Digital</option>
+          <option value="physical">Physical</option>
+        </select>
         <div className="flex gap-3">
           <button
             type="submit"

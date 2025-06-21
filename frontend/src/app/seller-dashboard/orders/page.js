@@ -34,7 +34,7 @@ export default function SellerOrdersPage() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-4">
+    <main className="max-w-8xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Seller Orders</h2>
       <Link
         href="/seller-dashboard"
@@ -60,6 +60,8 @@ export default function SellerOrdersPage() {
                   Platform Cut (ETH)
                 </th>
                 <th className="py-2 px-3 text-left w-32">Seller Tx</th>
+                <th className="py-2 px-3 text-left w-24">Type</th>
+                <th className="py-2 px-3 text-left w-40">Shipping Address</th>
                 <th className="py-2 px-3 text-left w-32">Date</th>
               </tr>
             </thead>
@@ -87,6 +89,14 @@ export default function SellerOrdersPage() {
                     >
                       {order.txHash?.slice(0, 10)}...
                     </a>
+                  </td>
+                  <td className="py-2 px-3">
+                    {order.product?.type || "digital"}
+                  </td>
+                  <td className="py-2 px-3">
+                    {order.product?.type === "physical"
+                      ? order.shippingAddress || <span className="italic text-gray-400">N/A</span>
+                      : <span className="italic text-gray-400">-</span>}
                   </td>
                   <td className="py-2 px-3 truncate max-w-[8rem]">
                     {new Date(order.createdAt).toLocaleString()}

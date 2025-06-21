@@ -28,6 +28,15 @@ export default function ProductDetailPage({ params }) {
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [txHash, setTxHash] = useState(null);
 
+  // For structured shipping address
+  const [shippingFields, setShippingFields] = useState({
+    name: "",
+    street: "",
+    city: "",
+    postcode: "",
+    country: "",
+  });
+
   // Read platform percent from contract
   const { data: platformPercentRaw } = useReadContract({
     address: ESCROW_CONTRACT,
@@ -51,6 +60,9 @@ export default function ProductDetailPage({ params }) {
 
   const { writeContractAsync, isPending, error } = useWriteContract();
 
+  // Merge shipping fields into one string
+  const shippingAddress = `${shippingFields.name}, ${shippingFields.street}, ${shippingFields.city}, ${shippingFields.postcode}, ${shippingFields.country}`;
+
   // Submit order to backend after txHash is set
   useEffect(() => {
     if (txHash && !orderSubmitted && product) {
@@ -58,19 +70,23 @@ export default function ProductDetailPage({ params }) {
       (async () => {
         try {
           const jwt = localStorage.getItem("jwt");
+          const orderBody = {
+            productId: product.id,
+            txHash,
+            buyer: address,
+            platformAmount: parseFloat(platformEth),
+            sellerAmount: parseFloat(sellerEth),
+          };
+          if (product.type === "physical") {
+            orderBody.shippingAddress = shippingAddress;
+          }
           const res = await fetch(`${API_URL}/orders`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${jwt}`,
             },
-            body: JSON.stringify({
-              productId: product.id,
-              txHash,
-              buyer: address,
-              platformAmount: parseFloat(platformEth),
-              sellerAmount: parseFloat(sellerEth),
-            }),
+            body: JSON.stringify(orderBody),
           });
           if (res.ok) {
             setMessage("Order complete! Payment sent via escrow.");
@@ -84,7 +100,7 @@ export default function ProductDetailPage({ params }) {
         }
       })();
     }
-  }, [txHash, orderSubmitted, product, address, platformEth, sellerEth]);
+  }, [txHash, orderSubmitted, product, address, platformEth, sellerEth, shippingAddress]);
 
   const handleBuy = async () => {
     setMessage("");
@@ -94,6 +110,20 @@ export default function ProductDetailPage({ params }) {
     if (!ESCROW_CONTRACT || !product?.seller || !writeContractAsync) {
       setMessage("Wallet not connected or contract misconfigured.");
       return;
+    }
+
+    if (product.type === "physical") {
+      // Validate all fields are filled
+      if (
+        !shippingFields.name.trim() ||
+        !shippingFields.street.trim() ||
+        !shippingFields.city.trim() ||
+        !shippingFields.postcode.trim() ||
+        !shippingFields.country.trim()
+      ) {
+        setMessage("Please fill in all shipping address fields.");
+        return;
+      }
     }
 
     try {
@@ -130,6 +160,9 @@ export default function ProductDetailPage({ params }) {
         <span className="font-semibold">Seller:</span> {product.seller}
       </div>
       <div className="mb-2">
+        <span className="font-semibold">Type:</span> {product.type || "digital"}
+      </div>
+      <div className="mb-2">
         <span className="font-semibold">Status:</span> {product.status}
       </div>
       <div className="mb-4">
@@ -143,6 +176,41 @@ export default function ProductDetailPage({ params }) {
           Seller receives ({SELLER_PERCENT}%): {sellerEth} ETH
         </span>
       </div>
+      {product.type === "physical" && (
+        <div className="mb-4">
+          <label className="block font-semibold mb-1">Shipping Address:</label>
+          <input
+            className="border rounded px-3 py-2 w-full mb-2"
+            placeholder="Full Name"
+            value={shippingFields.name}
+            onChange={e => setShippingFields(f => ({ ...f, name: e.target.value }))}
+          />
+          <input
+            className="border rounded px-3 py-2 w-full mb-2"
+            placeholder="Street Address"
+            value={shippingFields.street}
+            onChange={e => setShippingFields(f => ({ ...f, street: e.target.value }))}
+          />
+          <input
+            className="border rounded px-3 py-2 w-full mb-2"
+            placeholder="City"
+            value={shippingFields.city}
+            onChange={e => setShippingFields(f => ({ ...f, city: e.target.value }))}
+          />
+          <input
+            className="border rounded px-3 py-2 w-full mb-2"
+            placeholder="Postcode"
+            value={shippingFields.postcode}
+            onChange={e => setShippingFields(f => ({ ...f, postcode: e.target.value }))}
+          />
+          <input
+            className="border rounded px-3 py-2 w-full"
+            placeholder="Country"
+            value={shippingFields.country}
+            onChange={e => setShippingFields(f => ({ ...f, country: e.target.value }))}
+          />
+        </div>
+      )}
       {product.status === "approved" && (
         <>
           {!isConnected ? (

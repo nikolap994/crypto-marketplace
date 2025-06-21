@@ -17,6 +17,7 @@ export default function SellerDashboard() {
     description: "",
     priceUsd: "",
     seller: "",
+    type: "digital", // default to digital
   });
   const [message, setMessage] = useState("");
   const [myProducts, setMyProducts] = useState([]);
@@ -106,6 +107,7 @@ export default function SellerDashboard() {
       body: JSON.stringify({
         ...form,
         priceUsd: parseFloat(form.priceUsd),
+        type: form.type || "digital",
       }),
     });
     if (res.ok) {
@@ -115,6 +117,7 @@ export default function SellerDashboard() {
         description: "",
         priceUsd: "",
         seller: address || "",
+        type: "digital",
       });
     } else {
       const data = await res.json();
@@ -126,7 +129,6 @@ export default function SellerDashboard() {
     <main className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Seller Dashboard</h2>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <Link href="/products" className="text-blue-600 hover:underline">&larr; Back to products</Link>
         <Link href="/seller-dashboard/orders" className="text-blue-600 hover:underline">View Orders</Link>
       </div>
       <div className="bg-white rounded shadow p-4 mb-8">
@@ -153,6 +155,14 @@ export default function SellerDashboard() {
             value={form.priceUsd}
             onChange={(e) => setForm((f) => ({ ...f, priceUsd: e.target.value }))}
           />
+          <select
+            className="border rounded px-3 py-2"
+            value={form.type || "digital"}
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+          >
+            <option value="digital">Digital</option>
+            <option value="physical">Physical</option>
+          </select>
           <input
             className="border rounded px-3 py-2 bg-gray-100"
             placeholder="Seller Address"
@@ -180,6 +190,7 @@ export default function SellerDashboard() {
                 <th className="py-2 px-3 text-left">Title</th>
                 <th className="py-2 px-3 text-left">Description</th>
                 <th className="py-2 px-3 text-left">Price (USD)</th>
+                <th className="py-2 px-3 text-left">Type</th>
                 <th className="py-2 px-3 text-left">Status</th>
                 <th className="py-2 px-3 text-left">Created</th>
                 <th className="py-2 px-3 text-left">Edit</th>
@@ -191,6 +202,7 @@ export default function SellerDashboard() {
                   <td className="py-2 px-3">{p.title}</td>
                   <td className="py-2 px-3">{p.description}</td>
                   <td className="py-2 px-3">${p.priceUsd}</td>
+                  <td className="py-2 px-3">{p.type || "digital"}</td>
                   <td className="py-2 px-3">{p.status}</td>
                   <td className="py-2 px-3">{new Date(p.createdAt).toLocaleString()}</td>
                   <td className="py-2 px-3">

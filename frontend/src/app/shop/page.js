@@ -34,6 +34,9 @@ export default function ProductsPage() {
               <span className="ml-4 text-xs text-gray-400">
                 Seller: {p.seller}
               </span>
+              <span className="ml-4 text-xs text-gray-500">
+                Type: {p.type || "digital"}
+              </span>
             </div>
             <Link
               href={`/shop/${p.id}`}

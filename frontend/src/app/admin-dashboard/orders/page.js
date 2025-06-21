@@ -49,6 +49,8 @@ export default function AdminOrdersPage() {
                   Seller Cut (ETH)
                 </th>
                 <th className="py-2 px-3 text-left">Seller Tx</th>
+                <th className="py-2 px-3 text-left">Type</th>
+                <th className="py-2 px-3 text-left">Shipping Address</th>
                 <th className="py-2 px-3 text-left">Date</th>
               </tr>
             </thead>
@@ -77,6 +79,14 @@ export default function AdminOrdersPage() {
                     >
                       {order.txHash?.slice(0, 10)}...
                     </a>
+                  </td>
+                  <td className="py-2 px-3">
+                    {order.product?.type || "digital"}
+                  </td>
+                  <td className="py-2 px-3">
+                    {order.product?.type === "physical"
+                      ? order.shippingAddress || <span className="italic text-gray-400">N/A</span>
+                      : <span className="italic text-gray-400">-</span>}
                   </td>
                   <td className="py-2 px-3">
                     {new Date(order.createdAt).toLocaleString()}

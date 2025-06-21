@@ -106,7 +106,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-4">
+    <main className="max-w-8xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Super Admin Dashboard</h2>
       <p className="mb-4">
         <Link href="/admin-dashboard/orders" className="text-blue-600 hover:underline">Orders</Link>
@@ -124,6 +124,8 @@ export default function AdminDashboard() {
                 <th className="py-2 px-3 text-left">Description</th>
                 <th className="py-2 px-3 text-left">Seller</th>
                 <th className="py-2 px-3 text-left">Price</th>
+                <th className="py-2 px-3 text-left">Type</th>
+                <th className="py-2 px-3 text-left">Created</th>
                 <th className="py-2 px-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -134,6 +136,8 @@ export default function AdminDashboard() {
                   <td className="py-2 px-3">{p.description}</td>
                   <td className="py-2 px-3">{p.seller}</td>
                   <td className="py-2 px-3">${p.priceUsd}</td>
+                  <td className="py-2 px-3">{p.type}</td>
+                  <td className="py-2 px-3">{new Date(p.createdAt).toLocaleString()}</td>
                   <td className="py-2 px-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => handleAction(p.id, "approved")}
