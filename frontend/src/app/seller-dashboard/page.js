@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAccount, useSignMessage, useDisconnect } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
+import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,8 +18,10 @@ export default function SellerDashboard() {
     description: "",
     priceUsd: "",
     seller: "",
-    type: "digital", // default to digital
+    type: "digital",
+    images: [],
   });
+  const [imageInputs, setImageInputs] = useState(["", "", ""]);
   const [message, setMessage] = useState("");
   const [myProducts, setMyProducts] = useState([]);
 
@@ -85,11 +88,41 @@ export default function SellerDashboard() {
     fetchMyProducts();
   }, [jwt, address, message]);
 
+  // Handle base64 image upload
+  const handleImageUpload = (idx, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      const newInputs = [...imageInputs];
+      newInputs[idx] = base64;
+      setImageInputs(newInputs);
+      setForm((f) => ({
+        ...f,
+        images: newInputs.filter((img) => img.trim() !== ""),
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // For manual URL input (optional, can be removed if only upload is allowed)
+  const handleImageChange = (idx, value) => {
+    const newInputs = [...imageInputs];
+    newInputs[idx] = value;
+    setImageInputs(newInputs);
+    setForm((f) => ({
+      ...f,
+      images: newInputs.filter((img) => img.trim() !== ""),
+    }));
+  };
+
   if (!isConnected || !jwt || checkingJwt) {
     return (
       <main className="max-w-2xl mx-auto p-4">
         <h2 className="text-2xl font-bold mb-4">Seller Dashboard</h2>
-        <p className="mb-4">Please sign in with your wallet to access the seller dashboard.</p>
+        <p className="mb-4">
+          Please sign in with your wallet to access the seller dashboard.
+        </p>
         <ConnectButton />
       </main>
     );
@@ -98,6 +131,7 @@ export default function SellerDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    const images = imageInputs.filter((img) => img.trim() !== "");
     const res = await fetch(`${API_URL}/products`, {
       method: "POST",
       headers: {
@@ -106,6 +140,7 @@ export default function SellerDashboard() {
       },
       body: JSON.stringify({
         ...form,
+        images,
         priceUsd: parseFloat(form.priceUsd),
         type: form.type || "digital",
       }),
@@ -118,7 +153,9 @@ export default function SellerDashboard() {
         priceUsd: "",
         seller: address || "",
         type: "digital",
+        images: [],
       });
+      setImageInputs(["", "", ""]);
     } else {
       const data = await res.json();
       setMessage(data.error || "Failed to create product");
@@ -129,7 +166,12 @@ export default function SellerDashboard() {
     <main className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Seller Dashboard</h2>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <Link href="/seller-dashboard/orders" className="text-blue-600 hover:underline">View Orders</Link>
+        <Link
+          href="/seller-dashboard/orders"
+          className="text-blue-600 hover:underline"
+        >
+          View Orders
+        </Link>
       </div>
       <div className="bg-white rounded shadow p-4 mb-8">
         <h3 className="text-lg font-semibold mb-2">Add Product</h3>
@@ -153,7 +195,9 @@ export default function SellerDashboard() {
             placeholder="Price (USD)"
             type="number"
             value={form.priceUsd}
-            onChange={(e) => setForm((f) => ({ ...f, priceUsd: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, priceUsd: e.target.value }))
+            }
           />
           <select
             className="border rounded px-3 py-2"
@@ -163,6 +207,37 @@ export default function SellerDashboard() {
             <option value="digital">Digital</option>
             <option value="physical">Physical</option>
           </select>
+          <div>
+            <label className="block font-semibold mb-1">
+              Product Images (max 3, upload or paste base64):
+            </label>
+            {[0, 1, 2].map((idx) => (
+              <div key={idx} className="flex items-center gap-2 mb-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    handleImageUpload(idx, e.target.files?.[0] || null)
+                  }
+                  className="border rounded px-2 py-1"
+                />
+                <input
+                  className="border rounded px-3 py-2 w-full"
+                  placeholder={`Paste base64 or image URL ${idx + 1}`}
+                  value={imageInputs[idx]}
+                  onChange={(e) => handleImageChange(idx, e.target.value)}
+                  maxLength={102400}
+                />
+                <Image
+                  src={imageInputs[idx]}
+                  alt={`Preview ${idx + 1}`}
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 object-cover rounded border"
+                />
+              </div>
+            ))}
+          </div>
           <input
             className="border rounded px-3 py-2 bg-gray-100"
             placeholder="Seller Address"
@@ -193,6 +268,7 @@ export default function SellerDashboard() {
                 <th className="py-2 px-3 text-left">Type</th>
                 <th className="py-2 px-3 text-left">Status</th>
                 <th className="py-2 px-3 text-left">Created</th>
+                <th className="py-2 px-3 text-left">Images</th>
                 <th className="py-2 px-3 text-left">Edit</th>
               </tr>
             </thead>
@@ -204,10 +280,32 @@ export default function SellerDashboard() {
                   <td className="py-2 px-3">${p.priceUsd}</td>
                   <td className="py-2 px-3">{p.type || "digital"}</td>
                   <td className="py-2 px-3">{p.status}</td>
-                  <td className="py-2 px-3">{new Date(p.createdAt).toLocaleString()}</td>
+                  <td className="py-2 px-3">
+                    {new Date(p.createdAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-3">
+                    {p.images && p.images.length > 0 ? (
+                      <div className="flex gap-2">
+                        {p.images.map((img, idx) => (
+                          <Image
+                            key={idx}
+                            src={img}
+                            alt={`Product image ${idx + 1}`}
+                            width={48}
+                            height={48}
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="italic text-gray-400">No images</span>
+                    )}
+                  </td>
                   <td className="py-2 px-3">
                     <Link href={`/seller-dashboard/${p.id}/edit`}>
-                      <button className="bg-gray-200 rounded px-3 py-1 hover:bg-gray-300 transition">Edit</button>
+                      <button className="bg-gray-200 rounded px-3 py-1 hover:bg-gray-300 transition">
+                        Edit
+                      </button>
                     </Link>
                   </td>
                 </tr>

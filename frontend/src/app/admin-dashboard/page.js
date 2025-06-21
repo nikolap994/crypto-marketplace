@@ -75,7 +75,10 @@ export default function AdminDashboard() {
     return (
       <main className="max-w-md mx-auto p-4">
         <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
-        <form onSubmit={handleLogin} className="flex flex-col gap-3 bg-white rounded shadow p-4 mb-6">
+        <form
+          onSubmit={handleLogin}
+          className="flex flex-col gap-3 bg-white rounded shadow p-4 mb-6"
+        >
           <input
             className="border rounded px-3 py-2"
             placeholder="Username"
@@ -109,7 +112,12 @@ export default function AdminDashboard() {
     <main className="max-w-8xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Super Admin Dashboard</h2>
       <p className="mb-4">
-        <Link href="/admin-dashboard/orders" className="text-blue-600 hover:underline">Orders</Link>
+        <Link
+          href="/admin-dashboard/orders"
+          className="text-blue-600 hover:underline"
+        >
+          Orders
+        </Link>
       </p>
       <h3 className="text-lg font-semibold mb-2">Pending Products</h3>
       {message && <p className="text-red-600 mb-2">{message}</p>}
@@ -125,6 +133,7 @@ export default function AdminDashboard() {
                 <th className="py-2 px-3 text-left">Seller</th>
                 <th className="py-2 px-3 text-left">Price</th>
                 <th className="py-2 px-3 text-left">Type</th>
+                <th className="py-2 px-3 text-left">Images</th>
                 <th className="py-2 px-3 text-left">Created</th>
                 <th className="py-2 px-3 text-left">Actions</th>
               </tr>
@@ -137,7 +146,28 @@ export default function AdminDashboard() {
                   <td className="py-2 px-3">{p.seller}</td>
                   <td className="py-2 px-3">${p.priceUsd}</td>
                   <td className="py-2 px-3">{p.type}</td>
-                  <td className="py-2 px-3">{new Date(p.createdAt).toLocaleString()}</td>
+                  <td className="py-2 px-3">
+                    {p.images && p.images.length > 0 ? (
+                      <div className="flex gap-2">
+                        {p.images.map(
+                          (img, idx) =>
+                            img && (
+                              <img
+                                key={idx}
+                                src={img}
+                                alt={`Product image ${idx + 1}`}
+                                className="w-12 h-12 object-cover rounded border"
+                              />
+                            )
+                        )}
+                      </div>
+                    ) : (
+                      <span className="italic text-gray-400">No images</span>
+                    )}
+                  </td>
+                  <td className="py-2 px-3">
+                    {new Date(p.createdAt).toLocaleString()}
+                  </td>
                   <td className="py-2 px-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => handleAction(p.id, "approved")}
@@ -152,7 +182,9 @@ export default function AdminDashboard() {
                       Reject
                     </button>
                     <Link href={`/admin-dashboard/${p.id}/edit`}>
-                      <button className="bg-gray-200 rounded px-3 py-1 hover:bg-gray-300 transition">Edit</button>
+                      <button className="bg-gray-200 rounded px-3 py-1 hover:bg-gray-300 transition">
+                        Edit
+                      </button>
                     </Link>
                     <button
                       onClick={() => handleDelete(p.id)}

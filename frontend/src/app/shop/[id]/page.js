@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -100,7 +101,15 @@ export default function ProductDetailPage({ params }) {
         }
       })();
     }
-  }, [txHash, orderSubmitted, product, address, platformEth, sellerEth, shippingAddress]);
+  }, [
+    txHash,
+    orderSubmitted,
+    product,
+    address,
+    platformEth,
+    sellerEth,
+    shippingAddress,
+  ]);
 
   const handleBuy = async () => {
     setMessage("");
@@ -152,6 +161,26 @@ export default function ProductDetailPage({ params }) {
         &larr; Back to products
       </Link>
       <h2 className="text-2xl font-bold mt-4 mb-2">{product.title}</h2>
+      {/* Product Images */}
+      {product.images && product.images.length > 0 && (
+        <>
+          {product.images.map(
+            (img, idx) =>
+              img && (
+                <Image
+                  key={idx}
+                  src={img}
+                  alt={`Product image ${idx + 1}`}
+                  width={128}
+                  height={128}
+                  className="w-32 h-32 object-cover rounded border"
+                  style={{ objectFit: "cover" }}
+                  unoptimized={img.startsWith("data:")}
+                />
+              )
+          )}
+        </>
+      )}
       <p className="mb-2">{product.description}</p>
       <div className="mb-2">
         <span className="font-semibold">Price:</span> ${product.priceUsd}
@@ -183,31 +212,41 @@ export default function ProductDetailPage({ params }) {
             className="border rounded px-3 py-2 w-full mb-2"
             placeholder="Full Name"
             value={shippingFields.name}
-            onChange={e => setShippingFields(f => ({ ...f, name: e.target.value }))}
+            onChange={(e) =>
+              setShippingFields((f) => ({ ...f, name: e.target.value }))
+            }
           />
           <input
             className="border rounded px-3 py-2 w-full mb-2"
             placeholder="Street Address"
             value={shippingFields.street}
-            onChange={e => setShippingFields(f => ({ ...f, street: e.target.value }))}
+            onChange={(e) =>
+              setShippingFields((f) => ({ ...f, street: e.target.value }))
+            }
           />
           <input
             className="border rounded px-3 py-2 w-full mb-2"
             placeholder="City"
             value={shippingFields.city}
-            onChange={e => setShippingFields(f => ({ ...f, city: e.target.value }))}
+            onChange={(e) =>
+              setShippingFields((f) => ({ ...f, city: e.target.value }))
+            }
           />
           <input
             className="border rounded px-3 py-2 w-full mb-2"
             placeholder="Postcode"
             value={shippingFields.postcode}
-            onChange={e => setShippingFields(f => ({ ...f, postcode: e.target.value }))}
+            onChange={(e) =>
+              setShippingFields((f) => ({ ...f, postcode: e.target.value }))
+            }
           />
           <input
             className="border rounded px-3 py-2 w-full"
             placeholder="Country"
             value={shippingFields.country}
-            onChange={e => setShippingFields(f => ({ ...f, country: e.target.value }))}
+            onChange={(e) =>
+              setShippingFields((f) => ({ ...f, country: e.target.value }))
+            }
           />
         </div>
       )}

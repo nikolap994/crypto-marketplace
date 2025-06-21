@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,8 +13,10 @@ export default function EditProductPage() {
     title: "",
     description: "",
     priceUsd: "",
-    type: "digital", // default to digital
+    type: "digital",
+    images: [],
   });
+  const [imageInputs, setImageInputs] = useState(["", "", ""]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -26,14 +29,47 @@ export default function EditProductPage() {
           description: data.description,
           priceUsd: data.priceUsd,
           type: data.type || "digital",
+          images: data.images || [],
         });
+        setImageInputs([
+          data.images?.[0] || "",
+          data.images?.[1] || "",
+          data.images?.[2] || "",
+        ]);
         setLoading(false);
       });
   }, [id]);
 
+  const handleImageUpload = (idx, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      const newInputs = [...imageInputs];
+      newInputs[idx] = base64;
+      setImageInputs(newInputs);
+      setForm((f) => ({
+        ...f,
+        images: newInputs.filter((img) => img.trim() !== ""),
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageChange = (idx, value) => {
+    const newInputs = [...imageInputs];
+    newInputs[idx] = value;
+    setImageInputs(newInputs);
+    setForm((f) => ({
+      ...f,
+      images: newInputs.filter((img) => img.trim() !== ""),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const jwt = localStorage.getItem("jwt");
+    const images = imageInputs.filter((img) => img.trim() !== "");
     const res = await fetch(`${API_URL}/products/${id}`, {
       method: "PATCH",
       headers: {
@@ -42,12 +78,13 @@ export default function EditProductPage() {
       },
       body: JSON.stringify({
         ...form,
+        images,
         priceUsd: parseFloat(form.priceUsd),
       }),
     });
     if (res.ok) {
       setMessage("Product updated!");
-      router.push(`/seller-dashboard/`);
+      router.push(`/admin-dashboard/`);
     } else {
       setMessage("Failed to update product");
     }
@@ -63,7 +100,7 @@ export default function EditProductPage() {
       },
     });
     if (res.ok) {
-      router.push("/seller-dashboard");
+      router.push("/admin-dashboard");
     } else {
       setMessage("Failed to delete product");
     }
@@ -104,6 +141,40 @@ export default function EditProductPage() {
           <option value="digital">Digital</option>
           <option value="physical">Physical</option>
         </select>
+        <div>
+          <label className="block font-semibold mb-1">
+            Product Images (max 3, upload or paste base64):
+          </label>
+          {[0, 1, 2].map((idx) => (
+            <div key={idx} className="flex items-center gap-2 mb-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  handleImageUpload(idx, e.target.files?.[0] || null)
+                }
+                className="border rounded px-2 py-1"
+              />
+              <input
+                className="border rounded px-3 py-2 w-full"
+                placeholder={`Paste base64 or image URL ${idx + 1}`}
+                value={imageInputs[idx]}
+                onChange={(e) => handleImageChange(idx, e.target.value)}
+                maxLength={102400}
+              />
+              {imageInputs[idx] && (
+                <Image
+                  src={imageInputs[idx]}
+                  alt={`Preview ${idx + 1}`}
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 object-cover rounded border"
+                  unoptimized
+                />
+              )}
+            </div>
+          ))}
+        </div>
         <div className="flex gap-3">
           <button
             type="submit"

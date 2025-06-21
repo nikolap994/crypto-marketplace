@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -23,20 +24,31 @@ export default function ProductsPage() {
             key={p.id}
             className="bg-white rounded shadow p-4 flex flex-col sm:flex-row sm:items-center justify-between"
           >
-            <div>
-              <Link
-                href={`/shop/${p.id}`}
-                className="text-lg font-semibold text-blue-700 hover:underline"
-              >
-                {p.title}
-              </Link>
-              <span className="ml-2 text-gray-600">${p.priceUsd}</span>
-              <span className="ml-4 text-xs text-gray-400">
-                Seller: {p.seller}
-              </span>
-              <span className="ml-4 text-xs text-gray-500">
-                Type: {p.type || "digital"}
-              </span>
+            <div className="flex items-center gap-4">
+              <Image
+                src={p.images[0]}
+                alt="Product"
+                width={64}
+                height={64}
+                className="w-16 h-16 object-cover rounded border"
+                style={{ width: "64px", height: "64px" }}
+                unoptimized={true}
+              />
+              <div>
+                <Link
+                  href={`/shop/${p.id}`}
+                  className="text-lg font-semibold text-blue-700 hover:underline"
+                >
+                  {p.title}
+                </Link>
+                <span className="ml-2 text-gray-600">${p.priceUsd}</span>
+                <span className="ml-4 text-xs text-gray-400">
+                  Seller: {p.seller}
+                </span>
+                <span className="ml-4 text-xs text-gray-500">
+                  Type: {p.type || "digital"}
+                </span>
+              </div>
             </div>
             <Link
               href={`/shop/${p.id}`}

@@ -35,12 +35,21 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.createProduct = async (req, res) => {
-  const { title, description, priceUsd, seller, type } = req.body;
+  const { title, description, priceUsd, seller, type, images } = req.body;
   if (!title || !description || !priceUsd || !seller)
     return res.status(400).json({ error: "Missing fields" });
+  if (images && images.length > 3)
+    return res.status(400).json({ error: "Maximum 3 images allowed" });
   try {
     const product = await prisma.product.create({
-      data: { title, description, priceUsd, seller, type: type || "digital" },
+      data: {
+        title,
+        description,
+        priceUsd,
+        seller,
+        type: type || "digital",
+        images: images && Array.isArray(images) ? images.slice(0, 3) : [],
+      },
     });
     res.status(201).json(product);
   } catch (error) {
@@ -51,11 +60,17 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { title, description, priceUsd, type } = req.body;
+  const { title, description, priceUsd, type, images } = req.body;
   try {
+    const updateData = { title, description, priceUsd, type };
+    if (images) {
+      if (images.length > 3)
+        return res.status(400).json({ error: "Maximum 3 images allowed" });
+      updateData.images = images.slice(0, 3);
+    }
     const product = await prisma.product.update({
       where: { id: Number(id) },
-      data: { title, description, priceUsd, type },
+      data: updateData,
     });
     res.json(product);
   } catch (error) {
