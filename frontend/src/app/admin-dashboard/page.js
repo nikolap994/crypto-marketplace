@@ -23,7 +23,7 @@ export default function AdminDashboard() {
       headers: { Authorization: `Bearer ${jwt}` },
     })
       .then((res) => res.json())
-      .then(setProducts);
+      .then((data) => setProducts(Array.isArray(data) ? data : []));
   }, [jwt]);
 
   const handleLogin = async (e) => {
@@ -79,13 +79,17 @@ export default function AdminDashboard() {
           <input
             placeholder="Username"
             value={loginForm.username}
-            onChange={e => setLoginForm(f => ({ ...f, username: e.target.value }))}
+            onChange={(e) =>
+              setLoginForm((f) => ({ ...f, username: e.target.value }))
+            }
           />
           <input
             placeholder="Password"
             type="password"
             value={loginForm.password}
-            onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
+            onChange={(e) =>
+              setLoginForm((f) => ({ ...f, password: e.target.value }))
+            }
           />
           <button type="submit">Login</button>
         </form>
@@ -97,6 +101,9 @@ export default function AdminDashboard() {
   return (
     <main>
       <h2>Super Admin Dashboard</h2>
+      <p>
+        <Link href="/admin-dashboard/orders">Orders</Link>
+      </p>
       <h3>Pending Products</h3>
       {message && <p style={{ color: "red" }}>{message}</p>}
       {products.length === 0 ? (
@@ -120,9 +127,16 @@ export default function AdminDashboard() {
                 <td>{p.seller}</td>
                 <td>${p.priceUsd}</td>
                 <td>
-                  <button onClick={() => handleAction(p.id, "approved")}>Approve</button>
-                  <button onClick={() => handleAction(p.id, "rejected")}>Reject</button>
-                  <Link href={`/admin-dashboard/${p.id}/edit`} style={{ marginLeft: 8 }}>
+                  <button onClick={() => handleAction(p.id, "approved")}>
+                    Approve
+                  </button>
+                  <button onClick={() => handleAction(p.id, "rejected")}>
+                    Reject
+                  </button>
+                  <Link
+                    href={`/admin-dashboard/${p.id}/edit`}
+                    style={{ marginLeft: 8 }}
+                  >
                     <button>Edit</button>
                   </Link>
                   <button

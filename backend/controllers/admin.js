@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
-  console.log(username, password);
   const admin = await prisma.admin.findUnique({ where: { username } });
   if (!admin) return res.status(401).json({ error: "Invalid credentials" });
   const valid = await bcrypt.compare(password, admin.password);

@@ -142,6 +142,9 @@ export default function SellerDashboard() {
       <p>
         <Link href="/products">&larr; Back to products</Link>
       </p>
+      <p>
+        <Link href="seller-dashboard/orders">Orders</Link>
+      </p>
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Title"
