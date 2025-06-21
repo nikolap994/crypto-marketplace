@@ -8,6 +8,7 @@ exports.createOrder = async (req, res) => {
     txHash,
     platformAmount,
     sellerAmount,
+    shippingAddress, // new field for physical products
   } = req.body;
   if (
     !productId ||
@@ -33,6 +34,7 @@ exports.createOrder = async (req, res) => {
         txHash,
         platformAmount,
         sellerAmount,
+        shippingAddress: product.type === "physical" ? shippingAddress : null,
       },
     });
     res.json(order);
