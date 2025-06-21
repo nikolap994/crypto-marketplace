@@ -36,3 +36,15 @@ exports.login = (req, res) => {
   delete nonces[address.toLowerCase()];
   res.json({ token });
 };
+
+exports.verify = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "No token" });
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev_secret");
+    res.json({ valid: true, address: decoded.address });
+  } catch {
+    res.status(401).json({ valid: false, error: "Invalid or expired token" });
+  }
+};

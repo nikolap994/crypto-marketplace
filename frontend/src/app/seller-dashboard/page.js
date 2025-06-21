@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAccount, useSignMessage, useDisconnect } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,6 +11,7 @@ export default function SellerDashboard() {
   const { signMessageAsync } = useSignMessage();
   const { disconnect } = useDisconnect();
   const [jwt, setJwt] = useState(null);
+  const [checkingJwt, setCheckingJwt] = useState(true);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -18,16 +20,35 @@ export default function SellerDashboard() {
   });
   const [message, setMessage] = useState("");
 
-  // On mount, load JWT from localStorage if it exists
+  // On mount, load JWT from localStorage if it exists and check validity
   useEffect(() => {
-    const storedJwt = localStorage.getItem("jwt");
-    if (storedJwt) setJwt(storedJwt);
-  }, []);
+    const checkToken = async () => {
+      setCheckingJwt(true);
+      const storedJwt = localStorage.getItem("jwt");
+      if (!storedJwt) {
+        setJwt(null);
+        setCheckingJwt(false);
+        return;
+      }
+      // Call the /auth/verify endpoint to check token validity
+      const res = await fetch(`${API_URL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${storedJwt}` },
+      });
+      if (res.status !== 200) {
+        setJwt(null);
+        localStorage.removeItem("jwt");
+      } else {
+        setJwt(storedJwt);
+      }
+      setCheckingJwt(false);
+    };
+    checkToken();
+  }, [isConnected, address]);
 
   // Wallet login logic (copy from homepage)
   useEffect(() => {
     const loginWithEthereum = async () => {
-      if (!isConnected || !address || jwt) return;
+      if (!isConnected || !address || jwt || checkingJwt) return;
 
       // 1. Fetch nonce from backend
       const nonceRes = await fetch(`${API_URL}/auth/nonce`, {
@@ -52,10 +73,10 @@ export default function SellerDashboard() {
       localStorage.setItem("jwt", token);
     };
 
-    if (isConnected && !jwt) {
+    if (isConnected && !jwt && !checkingJwt) {
       loginWithEthereum();
     }
-  }, [isConnected, address, signMessageAsync, jwt]);
+  }, [isConnected, address, signMessageAsync, jwt, checkingJwt]);
 
   // Autofill seller address from wallet
   useEffect(() => {
@@ -64,7 +85,7 @@ export default function SellerDashboard() {
     }
   }, [isConnected, address]);
 
-  if (!isConnected || !jwt) {
+  if (!isConnected || !jwt || checkingJwt) {
     return (
       <main>
         <h2>Seller Dashboard</h2>
@@ -90,7 +111,12 @@ export default function SellerDashboard() {
     });
     if (res.ok) {
       setMessage("Product created!");
-      setForm({ title: "", description: "", priceUsd: "", seller: address || "" });
+      setForm({
+        title: "",
+        description: "",
+        priceUsd: "",
+        seller: address || "",
+      });
     } else {
       const data = await res.json();
       setMessage(data.error || "Failed to create product");
@@ -101,6 +127,9 @@ export default function SellerDashboard() {
     <main>
       <h2>Seller Dashboard</h2>
       <h3>Add Product</h3>
+      <p>
+        <Link href="/products">&larr; Back to products</Link>
+      </p>
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Title"
@@ -110,7 +139,9 @@ export default function SellerDashboard() {
         <input
           placeholder="Description"
           value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, description: e.target.value }))
+          }
         />
         <input
           placeholder="Price (USD)"
@@ -118,11 +149,7 @@ export default function SellerDashboard() {
           value={form.priceUsd}
           onChange={(e) => setForm((f) => ({ ...f, priceUsd: e.target.value }))}
         />
-        <input
-          placeholder="Seller Address"
-          value={form.seller}
-          readOnly
-        />
+        <input placeholder="Seller Address" value={form.seller} readOnly />
         <button type="submit">Create</button>
       </form>
       {message && <p>{message}</p>}
