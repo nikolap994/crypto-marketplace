@@ -15,81 +15,11 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ---
 
-## 🧱 Project Structure
-
-```
-/crypto-marketplace/
-├── backend/         # Express.js API server
-│   ├── routes/
-│   ├── controllers/
-│   ├── db/
-│   ├── .env
-│   └── server.js
-├── frontend/        # Next.js frontend app
-│   ├── pages/
-│   ├── public/
-│   └── next.config.js
-├── README.md
-└── docker-compose.yml   # (optional)
-```
-
-
----
-
-## ⚙️ Tech Stack
-
-| Layer          | Technology                      |
-|----------------|--------------------------------|
-| Frontend       | Next.js + React + RainbowKit   |
-| Backend API    | Express.js (JavaScript)         |
-| Database       | PostgreSQL + Prisma (optional)  |
-| Wallet Auth    | SIWE (Sign-In With Ethereum)    |
-| Blockchain     | ethers.js + smart contracts     |
-| Storage        | AWS S3 / IPFS (optional)        |
-| Hosting        | Vercel (frontend), Fly.io/Railway (backend) |
-
----
-
 ## 🛠 Development Plan
 
 # 📆 6-Week MVP Development Plan
 
 A weekly breakdown for building the Crypto Escrow Marketplace MVP as a solo developer.
-
----
-
-## Week 1 – 🏗 Project Setup & Environment
-
-### Frontend
-- Initialize Next.js project
-- Install and configure RainbowKit & Wagmi for wallet integration
-- Set up basic routing and layout
-- Create Wallet Connect UI component
-
-### Backend
-- Initialize Express.js server
-- Set up PostgreSQL database with Docker
-- Add pgAdmin for local database inspection
-- Add `/ping` test route to confirm API is live
-
-📝 **Goal**: Dev environment ready, all tools connected
-
----
-
-## Week 2 – 🔐 Wallet Login (SIWE-lite)
-
-### Frontend
-- Display wallet connect button
-- Fetch login nonce from backend
-- Sign nonce with user wallet
-- Send signature and address to backend
-
-### Backend
-- Create `/auth/nonce` and `/auth/login` routes
-- Verify Ethereum signature using `ethers.utils.verifyMessage`
-- Return JWT or session to frontend
-
-📝 **Goal**: Users can securely log in with Ethereum wallet
 
 ---
 
