@@ -135,18 +135,6 @@ Backend API runs on: http://localhost:4000
 docker-compose up -d
 ```
 
-Open pgAdmin in your browser:
-👉 http://localhost:5050
-
-### Log in with:
-
-- Email: admin@local.com
-- Password: admin
-
-### Add a new server in pgAdmin:
-
-- Name: Local Postgres
-- Host: db
-- Port: 5432
-- Username: postgres
-- Password: postgres
+```bash
+npx prisma studio
+```
