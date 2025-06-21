@@ -17,96 +17,126 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ## 🛠 Development Plan
 
-# 📆 6-Week MVP Development Plan
-
-A weekly breakdown for building the Crypto Escrow Marketplace MVP as a solo developer.
+# 🛠 Crypto Marketplace MVP – Complete Development Plan
 
 ---
 
-## Week 3 – 🛍 Product Listing (CRUD)
+## ✅ Week 3 – 🛍 Product Listing (CRUD)
 
 ### Frontend
-- Create seller dashboard UI
-- Implement product create/edit form
-- Display product list for all users
+- ✅ Seller dashboard UI
+- ✅ Product create/edit form
+- ✅ Display product list for all users
+- 🔄 Show "My Listings" (products submitted by current wallet)
+- 🔍 Product status indicators (pending / approved / rejected)
 
 ### Backend
-- Create endpoints:
+- ✅ Endpoints:
   - `POST /products`
   - `GET /products`
   - `GET /products/:id`
-- Set up `products` table with fields: id, title, description, price, seller_address, status
+- ✅ Database: `products` table
+  - `id`, `title`, `description`, `price`, `seller`, `status`, `createdAt`
+- 🔐 Middleware:
+  - Restrict `POST`/`PATCH` to authenticated users
+  - Only allow product owner to edit/delete (if not yet approved)
 
-📝 **Goal**: Sellers can list and manage products (admin approval pending)
+📝 **Goal**: Sellers can list and manage their own products, and approved products are publicly visible.
 
 ---
 
-## Week 4 – 💸 Orders & Manual ETH Payment
+## ✅ Week 4 – 💸 Orders & Manual ETH Payment
 
 ### Frontend
-- Build product detail page
-- Add "Buy with ETH" button
-- Show payment instructions and input field for TX hash
+- ✅ Product detail page (`/products/:id`)
+- ✅ "Buy with ETH" button
+- ✅ Show payment instructions (platform wallet address)
+- ✅ Input field for TX hash (after sending)
+- ✅ Buyer dashboard (`/my-orders`) – view purchases
+- ✅ Seller dashboard – view received orders
 
 ### Backend
-- Create endpoints:
+- ✅ Endpoints:
   - `POST /orders`
-  - `GET /orders/:user`
-- Store buyer address, product ID, TX hash
-- Validate ETH addresses
+  - `GET /orders?seller=0x...`
+  - `GET /orders?buyer=0x...`
+- ✅ Database: `orders` table
+  - `id`, `productId`, `buyer`, `txHash`, `status`, `createdAt`
+- 🔍 Validations:
+  - Product must be `approved`
+  - Buyer cannot be the seller
+  - TX hash format check
 
-📝 **Goal**: Buyers can initiate purchases and submit transaction hashes
+📝 **Goal**: Buyers can purchase with ETH and track orders; sellers can view their sales.
 
 ---
 
-## Week 5 – 🛠 Admin Panel & Escrow Release
+## ✅ Week 5 – 🛠 Admin Panel & Escrow Release
 
 ### Frontend
-- Create admin dashboard UI
-- Display pending product approvals and orders
-- Add "Approve" and "Release Funds" buttons
+- ✅ Admin login / wallet verification
+- ✅ Admin dashboard:
+  - View pending products
+  - Approve/reject product submissions
+  - View orders and mark as paid/released
 
 ### Backend
-- Create admin endpoints:
+- ✅ Admin-only endpoints:
   - `GET /admin/products`
-  - `PATCH /admin/products/:id` (approve product)
-  - `POST /admin/release/:orderId` (mark as released)
+  - `PATCH /admin/products/:id` – approve/reject
+  - `GET /admin/orders`
+  - `POST /admin/release/:orderId` – mark as released
+- ✅ Manual payout tracking:
+  - Admin manually sends funds
+  - Order status updated to `released`
 
-📝 **Goal**: Manual review and release of funds supported via admin interface
+📝 **Goal**: Admin can review products and confirm fund release (manual escrow).
 
 ---
 
-## Week 6 – 🚀 Polish & Deployment
+## ✅ Week 6 – 🚀 Polish & Deployment
 
 ### Frontend
-- Style the app for responsiveness and usability
-- Polish UI/UX
-- Deploy frontend to **Vercel**
+- ✅ Style app for mobile + responsive design
+- ✅ Add success/error messages
+- ✅ Add loading states
+- ✅ Deploy frontend to [Vercel](https://vercel.com)
 
 ### Backend
-- Finalize and debug routes
-- Deploy backend to **Railway** or **Fly.io**
-- Configure production PostgreSQL (e.g., Railway)
+- ✅ Add route validations & error handling
+- ✅ Clean up logging & middleware
+- ✅ Deploy backend to [Railway](https://railway.app) or [Fly.io](https://fly.io)
+- ✅ Use production PostgreSQL (e.g. Railway)
 
-📝 **Goal**: Deployed MVP with basic end-to-end functionality
-
----
-
-📌 Optional Post-MVP Enhancements:
-- Smart contract escrow
-- Solana/Bitcoin support
-- Dispute resolution flow
-- Email notifications
-- Seller KYC
+📝 **Goal**: Full MVP is polished, deployed, and testable live.
 
 ---
 
-## 🔐 Wallet Authentication Flow (SIWE Lite)
+## 📌 Optional Post-MVP Enhancements
 
-1. Frontend requests a random nonce from `/auth/nonce`.
-2. User signs the nonce with their wallet.
-3. Frontend sends the signed message + address to `/auth/login`.
-4. Backend verifies the signature, authenticates user, and issues a JWT or session cookie.
+| Feature              | Description |
+|----------------------|-------------|
+| 🔐 Smart contract escrow | Replace manual escrow with ETH smart contract |
+| 💰 Multi-chain support  | Add Solana, Bitcoin support |
+| 📨 Email notifications  | Notify seller/admin of new order or approval |
+| 🧾 Dispute system        | Allow buyers to flag disputes |
+| 🧑 Seller profiles       | Add display name, avatar, social links |
+| 🖼 Product image upload  | Store via Cloudinary or S3 |
+| 📊 Dashboard stats       | Total sales, revenue, orders, etc. |
+
+---
+
+## ✅ Final MVP Scope Summary
+
+| Feature | Status |
+|--------|--------|
+| Wallet login (SIWE) | ✅ Done / planned |
+| Product submission | ✅ Done |
+| Seller dashboard | ✅ Done |
+| Buyer purchase + order form | ✅ Done |
+| Admin review panel | ✅ Done |
+| Manual escrow + payout logging | ✅ Done |
+| Responsive design + deploy | ✅ Done |
 
 ---
 

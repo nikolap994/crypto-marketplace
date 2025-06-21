@@ -3,7 +3,14 @@ const prisma = new PrismaClient();
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await prisma.product.findMany();
+    const where = {};
+    if (req.query.seller) {
+      where.seller = {
+        equals: req.query.seller,
+        mode: "insensitive",
+      };
+    }
+    const products = await prisma.product.findMany({ where });
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch products" });

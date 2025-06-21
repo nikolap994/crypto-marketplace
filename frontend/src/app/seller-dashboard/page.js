@@ -19,6 +19,7 @@ export default function SellerDashboard() {
     seller: "",
   });
   const [message, setMessage] = useState("");
+  const [myProducts, setMyProducts] = useState([]);
 
   // On mount, load JWT from localStorage if it exists and check validity
   useEffect(() => {
@@ -84,6 +85,17 @@ export default function SellerDashboard() {
       setForm((f) => ({ ...f, seller: address }));
     }
   }, [isConnected, address]);
+
+  // Fetch products for current seller
+  useEffect(() => {
+    const fetchMyProducts = async () => {
+      if (!jwt || !address) return;
+      const res = await fetch(`${API_URL}/products?seller=${address}`);
+      const mine = await res.json();
+      setMyProducts(mine);
+    };
+    fetchMyProducts();
+  }, [jwt, address, message]); // refetch after product creation
 
   if (!isConnected || !jwt || checkingJwt) {
     return (
@@ -153,6 +165,35 @@ export default function SellerDashboard() {
         <button type="submit">Create</button>
       </form>
       {message && <p>{message}</p>}
+
+      <h3>Your Products</h3>
+      {myProducts.length === 0 ? (
+        <p>No products found for this wallet.</p>
+      ) : (
+        <table border="1" cellPadding="6">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Price (USD)</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {myProducts.map((p) => (
+              <tr key={p.id}>
+                <td>{p.title}</td>
+                <td>{p.description}</td>
+                <td>${p.priceUsd}</td>
+                <td>{p.status}</td>
+                <td>{new Date(p.createdAt).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
       <button
         onClick={() => {
           disconnect();
