@@ -15,6 +15,9 @@ export default function ProductsPage() {
       .then(setProducts);
   }, []);
 
+  // Default image URL (place in your public folder or use a placeholder service)
+  const DEFAULT_IMAGE = "/unnamed.jpg";
+
   return (
     <main className="max-w-2xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-6">Product List</h2>
@@ -26,13 +29,17 @@ export default function ProductsPage() {
           >
             <div className="flex items-center gap-4">
               <Image
-                src={p.images[0]}
+                src={p.images && p.images[0] ? p.images[0] : DEFAULT_IMAGE}
                 alt="Product"
                 width={64}
                 height={64}
                 className="w-16 h-16 object-cover rounded border"
                 style={{ width: "64px", height: "64px" }}
                 unoptimized={true}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = DEFAULT_IMAGE;
+                }}
               />
               <div>
                 <Link
