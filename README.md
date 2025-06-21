@@ -17,32 +17,6 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ## 🛠 Development Plan
 
-## ✅ Week 4 – 💸 Orders & Manual ETH Payment
-
-### Frontend
-- ✅ Product detail page (`/products/:id`)
-- ✅ "Buy with ETH" button
-- ✅ Show payment instructions (platform wallet address)
-- ✅ Input field for TX hash (after sending)
-- ✅ Buyer dashboard (`/my-orders`) – view purchases
-- ✅ Seller dashboard – view received orders
-
-### Backend
-- ✅ Endpoints:
-  - `POST /orders`
-  - `GET /orders?seller=0x...`
-  - `GET /orders?buyer=0x...`
-- ✅ Database: `orders` table
-  - `id`, `productId`, `buyer`, `txHash`, `status`, `createdAt`
-- 🔍 Validations:
-  - Product must be `approved`
-  - Buyer cannot be the seller
-  - TX hash format check
-
-📝 **Goal**: Buyers can purchase with ETH and track orders; sellers can view their sales.
-
----
-
 ## ✅ Week 5 – 🛠 Admin Panel & Escrow Release
 
 ### Frontend

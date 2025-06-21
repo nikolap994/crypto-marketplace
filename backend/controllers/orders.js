@@ -2,21 +2,44 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.createOrder = async (req, res) => {
-  const { productId, buyer, txHash } = req.body;
-  if (!productId || !buyer || !txHash)
+  const {
+    productId,
+    buyer,
+    txHash,
+    platformTxHash,
+    platformAmount,
+    sellerAmount,
+  } = req.body;
+  if (
+    !productId ||
+    !buyer ||
+    !txHash ||
+    !platformTxHash ||
+    !platformAmount ||
+    !sellerAmount
+  )
     return res.status(400).json({ error: "Missing fields" });
 
-  // Validate product is approved and buyer is not seller
   const product = await prisma.product.findUnique({ where: { id: productId } });
   if (!product) return res.status(404).json({ error: "Product not found" });
   if (product.status !== "approved")
     return res.status(400).json({ error: "Product not approved" });
-  if (!/^0x([A-Fa-f0-9]{64})$/.test(txHash))
+  if (
+    !/^0x([A-Fa-f0-9]{64})$/.test(txHash) ||
+    !/^0x([A-Fa-f0-9]{64})$/.test(platformTxHash)
+  )
     return res.status(400).json({ error: "Invalid tx hash" });
 
   try {
     const order = await prisma.order.create({
-      data: { productId, buyer, txHash },
+      data: {
+        productId,
+        buyer,
+        txHash,
+        platformTxHash,
+        platformAmount,
+        sellerAmount,
+      },
     });
     res.json(order);
   } catch (e) {

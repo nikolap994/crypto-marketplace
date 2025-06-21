@@ -25,12 +25,15 @@ model Admin {
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  productId Int
-  buyer     String
-  txHash    String   @unique
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  productId       Int
+  buyer           String
+  txHash          String    // Seller payment tx hash
+  platformTxHash  String            // Platform fee tx hash
+  platformAmount  Float             // Platform fee in ETH
+  sellerAmount    Float             // Seller payment in ETH
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id])
 }

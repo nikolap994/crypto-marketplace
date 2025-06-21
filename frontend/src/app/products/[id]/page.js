@@ -7,6 +7,8 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+const PLATFORM_PERCENT = parseFloat(process.env.NEXT_PUBLIC_PLATFORM_PERCENT || "5");
+const SELLER_PERCENT = 100 - PLATFORM_PERCENT;
 
 export default function ProductDetailPage({ params }) {
   const actualParams =
@@ -17,6 +19,7 @@ export default function ProductDetailPage({ params }) {
   const [product, setProduct] = useState(null);
   const [message, setMessage] = useState("");
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [txHashes, setTxHashes] = useState({ platform: null, seller: null });
 
   useEffect(() => {
     if (!id) return;
@@ -25,19 +28,23 @@ export default function ProductDetailPage({ params }) {
       .then(setProduct);
   }, [id]);
 
-  const ethAmount = product ? (product.priceUsd / 3500).toFixed(6) : "0";
+  // Calculate ETH amounts using env percentages
+  const totalEth = product ? product.priceUsd / 3500 : 0;
+  const platformEth = ((totalEth * PLATFORM_PERCENT) / 100).toFixed(6);
+  const sellerEth = ((totalEth * SELLER_PERCENT) / 100).toFixed(6);
 
-  const { sendTransaction, data, isLoading, isSuccess, error, status } =
-    useSendTransaction();
+  const { sendTransactionAsync, isLoading, error } = useSendTransaction();
 
-  // React to transaction hash and confirmation
+  // React to both transaction hashes and submit order after both succeed
   useEffect(() => {
-    // In wagmi v2, data is the hash string, not an object
-    if (typeof data === "string" && !orderSubmitted) {
-      setMessage("Transaction sent! Waiting for confirmation...");
+    if (
+      txHashes.platform &&
+      txHashes.seller &&
+      !orderSubmitted
+    ) {
+      setMessage("Both transactions sent! Submitting order...");
       (async () => {
         try {
-          // Optionally, you could poll for confirmation here if needed
           const jwt = localStorage.getItem("jwt");
           const res = await fetch(`${API_URL}/orders`, {
             method: "POST",
@@ -47,35 +54,56 @@ export default function ProductDetailPage({ params }) {
             },
             body: JSON.stringify({
               productId: product.id,
-              txHash: data,
+              txHash: txHashes.seller, // Seller payment tx hash
               buyer: address,
+              platformTxHash: txHashes.platform, // Platform fee tx hash
+              platformAmount: parseFloat(platformEth),
+              sellerAmount: parseFloat(sellerEth),
             }),
           });
           if (res.ok) {
-            setMessage("Transaction confirmed and order submitted!");
+            setMessage("Order complete! Both payments sent.");
           } else {
             const errData = await res.json();
             setMessage(errData.error || "Failed to submit order.");
           }
           setOrderSubmitted(true);
         } catch (err) {
-          setMessage("Transaction failed or was rejected.");
+          setMessage("Order failed to submit to backend.");
         }
       })();
     }
-  }, [data, orderSubmitted, product, address, id, error, isLoading, isSuccess, status]);
+  }, [txHashes, orderSubmitted, product, address, id, platformEth, sellerEth]);
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
     setMessage("");
     setOrderSubmitted(false);
-    if (!PLATFORM_WALLET || !sendTransaction) {
-      setMessage("Wallet not connected or platform wallet misconfigured.");
+    setTxHashes({ platform: null, seller: null });
+
+    if (!PLATFORM_WALLET || !product?.seller || !sendTransactionAsync) {
+      setMessage("Wallet not connected or platform/seller wallet misconfigured.");
       return;
     }
-    sendTransaction({
-      to: PLATFORM_WALLET,
-      value: parseEther(ethAmount),
-    });
+
+    try {
+      setMessage(`Sending ${PLATFORM_PERCENT}% platform fee...`);
+      const platformTx = await sendTransactionAsync({
+        to: PLATFORM_WALLET,
+        value: parseEther(platformEth),
+      });
+      setTxHashes((prev) => ({ ...prev, platform: typeof platformTx === "string" ? platformTx : platformTx.hash }));
+
+      setMessage(`Sending ${SELLER_PERCENT}% to seller...`);
+      const sellerTx = await sendTransactionAsync({
+        to: product.seller,
+        value: parseEther(sellerEth),
+      });
+      setTxHashes((prev) => ({ ...prev, seller: typeof sellerTx === "string" ? sellerTx : sellerTx.hash }));
+
+      setMessage("Both transactions sent! Waiting for confirmation...");
+    } catch (err) {
+      setMessage("Transaction failed or was rejected.");
+    }
   };
 
   if (!id) return <div>Invalid product ID.</div>;
@@ -90,7 +118,16 @@ export default function ProductDetailPage({ params }) {
       <p>Price: ${product.priceUsd}</p>
       <p>Seller: {product.seller}</p>
       <p>Status: {product.status}</p>
-      <p>ETH Amount: {ethAmount}</p>
+      <p>
+        ETH Amount: {totalEth.toFixed(6)} <br />
+        <span style={{ color: "orange" }}>
+          Platform fee ({PLATFORM_PERCENT}%): {platformEth} ETH
+        </span>
+        <br />
+        <span style={{ color: "green" }}>
+          Seller receives ({SELLER_PERCENT}%): {sellerEth} ETH
+        </span>
+      </p>
       {product.status === "approved" && (
         <>
           {!isConnected ? (
@@ -109,17 +146,27 @@ export default function ProductDetailPage({ params }) {
           )}
         </>
       )}
-      {typeof data === "string" && (
+      {txHashes.platform && (
         <p style={{ color: "orange" }}>
-          Transaction sent! Waiting for confirmation...
-          <br />
-          Hash:{" "}
+          Platform fee tx sent:{" "}
           <a
-            href={`https://etherscan.io/tx/${data}`}
+            href={`https://etherscan.io/tx/${txHashes.platform}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {data}
+            {txHashes.platform.slice(0, 12)}...
+          </a>
+        </p>
+      )}
+      {txHashes.seller && (
+        <p style={{ color: "green" }}>
+          Seller payment tx sent:{" "}
+          <a
+            href={`https://etherscan.io/tx/${txHashes.seller}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {txHashes.seller.slice(0, 12)}...
           </a>
         </p>
       )}

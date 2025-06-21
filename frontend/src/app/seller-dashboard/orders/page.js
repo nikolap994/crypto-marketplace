@@ -43,7 +43,10 @@ export default function SellerOrdersPage() {
             <tr>
               <th>Product</th>
               <th>Buyer</th>
-              <th>Tx Hash</th>
+              <th>Your Cut (ETH)</th>
+              <th>Platform Cut (ETH)</th>
+              <th>Seller Tx</th>
+              <th>Platform Tx</th>
               <th>Date</th>
             </tr>
           </thead>
@@ -52,13 +55,24 @@ export default function SellerOrdersPage() {
               <tr key={order.id}>
                 <td>{order.product?.title || "Unknown"}</td>
                 <td>{order.buyer}</td>
+                <td style={{ color: "green" }}>{order.sellerAmount}</td>
+                <td style={{ color: "orange" }}>{order.platformAmount}</td>
                 <td>
                   <a
                     href={`https://etherscan.io/tx/${order.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {order.txHash.slice(0, 10)}...
+                    {order.txHash?.slice(0, 10)}...
+                  </a>
+                </td>
+                <td>
+                  <a
+                    href={`https://etherscan.io/tx/${order.platformTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {order.platformTxHash?.slice(0, 10)}...
                   </a>
                 </td>
                 <td>{new Date(order.createdAt).toLocaleString()}</td>
