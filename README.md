@@ -17,29 +17,6 @@ The platform acts as a middleman/escrow and charges a platform fee on each trans
 
 ## 🛠 Development Plan
 
-## ✅ Week 5 – 🛠 Admin Panel & Escrow Release
-
-### Frontend
-- ✅ Admin login / wallet verification
-- ✅ Admin dashboard:
-  - View pending products
-  - Approve/reject product submissions
-  - View orders and mark as paid/released
-
-### Backend
-- ✅ Admin-only endpoints:
-  - `GET /admin/products`
-  - `PATCH /admin/products/:id` – approve/reject
-  - `GET /admin/orders`
-  - `POST /admin/release/:orderId` – mark as released
-- ✅ Manual payout tracking:
-  - Admin manually sends funds
-  - Order status updated to `released`
-
-📝 **Goal**: Admin can review products and confirm fund release (manual escrow).
-
----
-
 ## ✅ Week 6 – 🚀 Polish & Deployment
 
 ### Frontend
